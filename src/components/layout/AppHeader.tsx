@@ -1,0 +1,22 @@
+import { AppBar, Toolbar, Typography, Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+
+export const AppHeader = () => {
+    const navigate = useNavigate();
+
+    return (
+        <AppBar
+            position="fixed"
+            sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        >
+            <Toolbar>
+                <Typography variant="h6" sx={{ flexGrow: 1 }}>
+                    Панель пользователя
+                </Typography>
+                <Button color="inherit" onClick={() => navigate('/profile')}>
+                    Профиль
+                </Button>
+            </Toolbar>
+        </AppBar>
+    );
+};

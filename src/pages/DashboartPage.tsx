@@ -1,11 +1,13 @@
-// pages/DashboardPage.tsx
-import { useEffect, useState } from 'react';
-import { Box, Typography } from '@mui/material';
-import axios from 'axios';
+import { useEffect} from 'react';
+import { Box} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
+import { AppHeader } from '../components/layout/AppHeader';
+import { SideMenu } from '../components/layout/SideMenu';
+
+const HEADER_HEIGHT = 64;
 
 export const DashboardPage = () => {
-    const [message, setMessage] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -15,26 +17,25 @@ export const DashboardPage = () => {
             navigate('/login');
             return;
         }
-        console.log(token)
-
-        axios.get('http://localhost:8080/api/protected', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
-            },
-        })
-            .then(res => setMessage(res.data))
-            .catch(() => {
-                alert('Сессия истекла');
-                navigate('/login');
-            });
     }, []);
 
     return (
-        <Box sx={{ mt: 8, textAlign: 'center' }}>
-            <Typography variant="h4">Добро пожаловать!</Typography>
-            <Typography variant="body1" sx={{ mt: 2 }}>{message}</Typography>
+        <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+            <AppHeader />
+            <SideMenu />
+            <Box
+                component="main"
+                sx={{
+                    flexGrow: 1,
+                    mt: `${HEADER_HEIGHT}px`,
+                    p: 3,
+                    overflowY: 'auto',
+                    height: `calc(100vh - ${HEADER_HEIGHT}px)`,
+                    bgcolor: '#f9f9f9',
+                }}
+            >
+                <Outlet />
+            </Box>
         </Box>
     );
 };
