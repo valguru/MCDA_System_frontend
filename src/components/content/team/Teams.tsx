@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
-import { Box, Typography, Button, Paper, Stack } from '@mui/material';
+import {useEffect, useState} from 'react';
+import {Box, Typography, Button, Paper, Stack} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { useNavigate } from 'react-router-dom';
-import { teamApi } from '../../services/api';
-import { ErrorDialog } from '../common/ErrorDialog';
-import { Team } from '../../types/Team';
+import {useNavigate} from 'react-router-dom';
+import {teamApi} from '../../../services/api';
+import {ErrorDialog} from '../../common/ErrorDialog';
+import {Team} from '../../../types/Team';
 
 export const Teams = () => {
     const [teams, setTeams] = useState<Team[]>([]);
@@ -22,16 +22,16 @@ export const Teams = () => {
         teamApi.getMyTeams()
             .then(res => setTeams(res.data))
             .catch(err => {
-                    setError('Не удалось загрузить список команд');
-                    setDialogOpen(true);
+                setError('Не удалось загрузить список команд');
+                setDialogOpen(true);
             });
     }, []);
 
     return (
         <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3}}>
                 <Typography variant="h5">Мои команды</Typography>
-                <Button variant="contained" startIcon={<AddIcon />}>
+                <Button variant="contained" startIcon={<AddIcon/>} onClick={() => navigate('/dashboard/teams/create')}>
                     Создать
                 </Button>
             </Box>
@@ -41,7 +41,7 @@ export const Teams = () => {
             ) : (
                 <Stack spacing={2}>
                     {teams.map((team) => (
-                        <Paper key={team.id} sx={{ p: 2 }}>
+                        <Paper key={team.id} sx={{p: 2}}>
                             <Typography variant="h6">{team.name}</Typography>
                             <Typography variant="body2">
                                 Создатель: {team.createdBy.name}

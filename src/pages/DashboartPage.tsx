@@ -20,21 +20,24 @@ export const DashboardPage = () => {
     }, []);
 
     return (
-        <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
             <AppHeader />
-            <SideMenu />
-            <Box
-                component="main"
-                sx={{
-                    flexGrow: 1,
-                    mt: `${HEADER_HEIGHT}px`,
-                    p: 3,
-                    overflowY: 'auto',
-                    height: `calc(100vh - ${HEADER_HEIGHT}px)`,
-                    bgcolor: '#f9f9f9',
-                }}
-            >
-                <Outlet />
+
+            <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+                <SideMenu />
+
+                <Box
+                    component="main"
+                    sx={{
+                        flexGrow: 1,
+                        overflowY: 'auto',
+                        mt: `${HEADER_HEIGHT}px`,
+                        p: 3,
+                        bgcolor: '#f9f9f9',
+                    }}
+                >
+                    <Outlet />
+                </Box>
             </Box>
         </Box>
     );

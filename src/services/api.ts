@@ -35,6 +35,14 @@ export const authApi = {
 
 export const teamApi = {
     getMyTeams: () => api.get('/teams'),
+    createTeam: (data: { name: string; emails: string[] }) =>
+        api.post('/teams/create', data),
+    getSentInvites: () => api.get('/invitations/sent'),
+    getReceivedInvites: () => api.get('/invitations/received'),
+    respondToInvite: (id: number, accepted: boolean) =>
+        api.post(`/invitations/${id}/respond`, null, {
+            params: { accepted }
+        })
 };
 
 export default api;

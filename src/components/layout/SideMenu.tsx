@@ -11,6 +11,7 @@ export const SideMenu = () => {
     const menuItems = [
         { label: 'Мои команды', path: '/dashboard/teams' },
         { label: 'Мои вопросы', path: '/dashboard/questions' },
+        { label: 'Приглашения', path: '/dashboard/invitations'}
     ];
 
     return (

@@ -11,7 +11,7 @@ export const AppHeader = () => {
         >
             <Toolbar>
                 <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                    Панель пользователя
+                    Система поддержки принятия решений в Agile-командах
                 </Typography>
                 <Button color="inherit" onClick={() => navigate('/profile')}>
                     Профиль
