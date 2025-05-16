@@ -1,5 +1,6 @@
-import { AppBar, Toolbar, Typography, Button } from '@mui/material';
+import { AppBar, Toolbar, Typography, IconButton, Tooltip } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 export const AppHeader = () => {
     const navigate = useNavigate();
@@ -13,9 +14,12 @@ export const AppHeader = () => {
                 <Typography variant="h6" sx={{ flexGrow: 1 }}>
                     Система поддержки принятия решений в Agile-командах
                 </Typography>
-                <Button color="inherit" onClick={() => navigate('/profile')}>
-                    Профиль
-                </Button>
+
+                <Tooltip title="Профиль">
+                    <IconButton color="inherit" onClick={() => navigate('/dashboard/profile')}>
+                        <AccountCircleIcon />
+                    </IconButton>
+                </Tooltip>
             </Toolbar>
         </AppBar>
     );

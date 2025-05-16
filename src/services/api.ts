@@ -33,6 +33,10 @@ export const authApi = {
         api.post('/auth/register', { email, password, name }),
 };
 
+export const userApi = {
+    getCurrentUser: () => api.get('/user')
+};
+
 export const teamApi = {
     getMyTeams: () => api.get('/teams'),
     createTeam: (data: { name: string; emails: string[] }) =>

@@ -7,6 +7,7 @@ import {Teams} from "./components/content/team/Teams";
 import {Questions} from "./components/content/Questions";
 import {CreateTeam} from "./components/content/team/CreateTeam"
 import {Invitations} from "./components/content/invitation/Invitations";
+import {Profile} from "./components/content/profile/Profile";
 
 function App() {
     return (
@@ -20,6 +21,7 @@ function App() {
                     <Route path="teams/create" element={<CreateTeam/>}/>
                     <Route path="questions" element={<Questions/>}/>
                     <Route path="invitations" element={<Invitations/>}/>
+                    <Route path="profile" element={<Profile/>}/>
                     <Route index element={<Teams/>}/>
                 </Route>
             </Routes>
