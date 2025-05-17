@@ -28,10 +28,22 @@ api.interceptors.response.use(
 export const authApi = {
     login: (email: string, password: string) =>
         api.post('/auth/login', { email, password }),
-
-    register: (email: string, password: string, name: string) =>
-        api.post('/auth/register', { email, password, name }),
+    register: (
+        email: string,
+        password: string,
+        name: string,
+        surname?: string,
+        position?: string
+    ) =>
+        api.post('/auth/register', {
+            email,
+            password,
+            name,
+            surname,
+            position,
+        }),
 };
+
 
 export const userApi = {
     getCurrentUser: () => api.get('/user')
@@ -39,7 +51,10 @@ export const userApi = {
 
 export const teamApi = {
     getMyTeams: () => api.get('/teams'),
-    createTeam: (data: { name: string; emails: string[] }) =>
+    getTeamById(teamId: number) {
+        return api.get(`/teams/${teamId}`);
+    },
+    createTeam: (data: { name: string; description?: string, emails: string[] }) =>
         api.post('/teams/create', data),
     getSentInvites: () => api.get('/invitations/sent'),
     getReceivedInvites: () => api.get('/invitations/received'),

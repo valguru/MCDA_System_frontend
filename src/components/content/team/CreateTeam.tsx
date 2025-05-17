@@ -1,5 +1,5 @@
 import {
-    Box, Button, Chip, Paper, Stack, TextField, Typography,
+    Box, Button, Chip, Paper, Stack, TextField, Typography, Snackbar, Alert,
 } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +8,7 @@ import { teamApi } from '../../../services/api';
 
 type FormData = {
     name: string;
+    description?: string;
 };
 
 export const CreateTeam = () => {
@@ -16,7 +17,7 @@ export const CreateTeam = () => {
     const [inputEmail, setInputEmail] = useState('');
     const [emailList, setEmailList] = useState<string[]>([]);
     const [emailError, setEmailError] = useState('');
-    const [emailListError, setEmailListError] = useState(''); // Ошибка для списка участников
+    const [showSnackbar, setShowSnackbar] = useState(false);
 
     const isValidEmail = (email: string) =>
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -38,7 +39,6 @@ export const CreateTeam = () => {
         setEmailList([...emailList, trimmed]);
         setInputEmail('');
         setEmailError('');
-        setEmailListError(''); // сброс ошибки при добавлении email
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -50,19 +50,18 @@ export const CreateTeam = () => {
 
     const handleDelete = (email: string) => {
         setEmailList(emailList.filter(e => e !== email));
-        if (emailList.length - 1 === 0) {
-            setEmailListError('Добавьте хотя бы одного участника');
-        }
     };
 
     const onSubmit = async (data: FormData) => {
         if (emailList.length === 0) {
-            setEmailListError('Добавьте хотя бы одного участника');
+            setShowSnackbar(true);
             return;
         }
+
         try {
             await teamApi.createTeam({
                 name: data.name,
+                description: data.description || '',
                 emails: emailList,
             });
             navigate('/dashboard');
@@ -79,12 +78,33 @@ export const CreateTeam = () => {
 
             <form onSubmit={handleSubmit(onSubmit)}>
                 <Stack spacing={3}>
+                    <Box>
+                        <TextField
+                            label="Название команды"
+                            {...register('name', { required: true })}
+                            error={!!errors.name}
+                            fullWidth
+                        />
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                color: errors.name ? 'error.main' : 'text.secondary',
+                                mt: 0.5,
+                                ml: 0.5,
+                            }}
+                        >
+                            Обязательно
+                        </Typography>
+                    </Box>
+
                     <TextField
-                        label="Название команды"
-                        {...register('name', { required: 'Введите название команды' })}
-                        error={!!errors.name}
-                        helperText={errors.name?.message}
+                        label="Описание"
+                        {...register('description', { maxLength: 500 })}
+                        multiline
+                        rows={4}
                         fullWidth
+                        inputProps={{ maxLength: 500 }}
+                        helperText="Максимум 500 символов"
                     />
 
                     <TextField
@@ -112,17 +132,22 @@ export const CreateTeam = () => {
                         </Box>
                     )}
 
-                    {emailListError && (
-                        <Typography color="error" variant="body2">
-                            {emailListError}
-                        </Typography>
-                    )}
-
                     <Button variant="contained" type="submit">
                         Создать команду
                     </Button>
                 </Stack>
             </form>
+
+            <Snackbar
+                open={showSnackbar}
+                autoHideDuration={3000}
+                onClose={() => setShowSnackbar(false)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert severity="error" onClose={() => setShowSnackbar(false)}>
+                    Добавьте хотя бы одного участника
+                </Alert>
+            </Snackbar>
         </Paper>
     );
 };

@@ -125,7 +125,7 @@ export const Invitations = () => {
                 onClose={() => setToast({...toast, open: false})}
                 anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
             >
-                <Alert severity={toast.type} variant="filled" sx={{width: '100%'}}>
+                <Alert severity={toast.type} sx={{width: '100%'}}>
                     {toast.message}
                 </Alert>
             </Snackbar>

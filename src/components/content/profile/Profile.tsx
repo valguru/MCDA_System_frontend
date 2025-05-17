@@ -1,8 +1,10 @@
-import { Avatar, Box, Button, Paper, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { userApi } from '../../../services/api';
-import { Expert } from '../../../types/Expert';
+import {Avatar, Box, Button, Paper, Typography} from '@mui/material';
+import {useEffect, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {userApi} from '../../../services/api';
+import {Expert} from '../../../types/Expert';
+import PersonIcon from '@mui/icons-material/AccountCircleOutlined';
+
 
 export const Profile = () => {
     const [user, setUser] = useState<Expert | null>(null);
@@ -22,8 +24,14 @@ export const Profile = () => {
         navigate('/');
     };
 
-    const avatarUrl = user
-        ? `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.name)}`
+    const avatarSeed = user
+        ? user.surname
+            ? `${user.name} ${user.surname}`
+            : user.name
+        : '';
+
+    const avatarUrl = avatarSeed
+        ? `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(avatarSeed)}`
         : '';
 
     return (
@@ -47,19 +55,34 @@ export const Profile = () => {
                     src={avatarUrl}
                     alt={user?.name}
                     sx={{ width: 100, height: 100, mb: 2 }}
-                />
+                    onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.onerror = null;
+                        target.src = ''; // сбрасываем src, чтобы показать fallback
+                    }}
+                >
+                    <PersonIcon sx={{ fontSize: 110 }} />
+                </Avatar>
+
                 <Typography variant="h6">
-                    {user?.name || '...'}
+                    {user?.name} {user?.surname ?? ''}
                 </Typography>
-                <Typography color="text.secondary">
-                    {user?.email || '...'}
+
+                {user?.position && (
+                    <Typography color="text.secondary" align={"center"}>
+                        {user.position}
+                    </Typography>
+                )}
+
+                <Typography color="text.secondary" mb={1} >
+                    {user?.email}
                 </Typography>
 
                 <Button
                     variant="outlined"
                     color="error"
                     onClick={handleLogout}
-                    sx={{ mt: 4 }}
+                    sx={{mt: 4}}
                     fullWidth
                 >
                     Выйти
