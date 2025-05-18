@@ -64,4 +64,9 @@ export const teamApi = {
         })
 };
 
+export const questionApi = {
+    getQuestionsByTeam: (teamId: number, status: 'ALL' | 'ACTIVE' | 'RESOLVED') =>
+        api.get(`/teams/${teamId}/questions?status=${status}`),
+};
+
 export default api;

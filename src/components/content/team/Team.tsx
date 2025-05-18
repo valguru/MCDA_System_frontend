@@ -15,7 +15,7 @@ import AddIcon from '@mui/icons-material/Add';
 import StarIcon from '@mui/icons-material/Star';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { teamApi } from '../../../services/api';
+import { teamApi, questionApi } from '../../../services/api';
 import { Team as TeamType } from '../../../types/Team';
 
 export const Team = () => {
@@ -25,16 +25,12 @@ export const Team = () => {
     const [team, setTeam] = useState<TeamType | null>(null);
     const [loading, setLoading] = useState(true);
     const [tab, setTab] = useState(0);
-
-    // Моковые вопросы на время
-    const mockActiveQuestions = [
-        { id: 1, title: 'Вопрос временный', description: 'Описание временного вопроса' }
-    ];
-    const mockResolvedQuestions: any[] = [];
+    const [questions, setQuestions] = useState<any[]>([]);
 
     useEffect(() => {
         if (!id) return;
 
+        setLoading(true);
         teamApi.getTeamById(+id)
             .then(res => {
                 setTeam(res.data);
@@ -46,17 +42,34 @@ export const Team = () => {
                 } else {
                     console.error('Ошибка загрузки команды', err);
                 }
+                setLoading(false);
             });
     }, [id]);
+
+    useEffect(() => {
+        if (!id) return;
+
+        setLoading(true);
+        // Мапим табы к статусам вопроса с бэкенда
+        const status = tab === 0 ? 'ACTIVE' : 'RESOLVED';
+
+        questionApi.getQuestionsByTeam(+id, status)
+            .then(res => {
+                setQuestions(res.data);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error('Ошибка загрузки вопросов', err);
+                setQuestions([]);
+                setLoading(false);
+            });
+    }, [id, tab]);
 
     if (loading) {
         return <CircularProgress sx={{ mt: 4 }} />;
     }
 
     if (!team) return null;
-
-    // Используем моковые вопросы
-    const questions = tab === 0 ? mockActiveQuestions : mockResolvedQuestions;
 
     return (
         <Box sx={{ display: 'flex', gap: 4 }}>
@@ -111,9 +124,17 @@ export const Team = () => {
                         {questions.map((q) => (
                             <Paper key={q.id} sx={{ p: 2 }}>
                                 <Typography variant="subtitle1">{q.title}</Typography>
-                                <Typography color="text.secondary">{q.description}</Typography>
+                                <Typography color="text.secondary" sx={{ mb: 0.5 }}>
+                                    {q.description}
+                                </Typography>
+                                {q.createdBy && (
+                                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                                        Автор: {q.createdBy.name}{q.createdBy.surname ? ` ${q.createdBy.surname}` : ''}
+                                    </Typography>
+                                )}
                             </Paper>
                         ))}
+
                     </Stack>
                 )}
             </Box>
