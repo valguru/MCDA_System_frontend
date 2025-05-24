@@ -8,7 +8,7 @@ import {
     Stack,
     Paper,
     Tooltip,
-    CircularProgress,
+    CircularProgress, Snackbar, Alert,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
@@ -26,6 +26,7 @@ export const Team = () => {
     const [loading, setLoading] = useState(true);
     const [tab, setTab] = useState(0);
     const [questions, setQuestions] = useState<any[]>([]);
+    const [showAccessDenied, setShowAccessDenied] = useState(false);
 
     useEffect(() => {
         if (!id) return;
@@ -38,7 +39,8 @@ export const Team = () => {
             })
             .catch(err => {
                 if (err.response?.status === 403 || err.response?.status === 404) {
-                    navigate('/404');
+                    setShowAccessDenied(true);
+                    setTimeout(() => navigate('/dashboard/teams'), 3000);
                 } else {
                     console.error('Ошибка загрузки команды', err);
                 }
@@ -69,7 +71,20 @@ export const Team = () => {
         return <CircularProgress sx={{ mt: 4 }} />;
     }
 
-    if (!team) return null;
+    if (!team) {
+        return (
+            <>
+                <Snackbar
+                    open={showAccessDenied}
+                    anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
+                >
+                    <Alert severity="error" sx={{width: '100%'}}>
+                        У вас нет доступа к этой команде
+                    </Alert>
+                </Snackbar>
+            </>
+        );
+    }
 
     return (
         <Box sx={{ display: 'flex', gap: 4 }}>
@@ -112,6 +127,7 @@ export const Team = () => {
                         startIcon={<AddIcon />}
                         size="small"
                         sx={{ ml: 2 }}
+                        onClick={() => navigate(`/dashboard/teams/${id}/question/create`)}
                     >
                         Создать вопрос
                     </Button>

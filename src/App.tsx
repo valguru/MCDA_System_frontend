@@ -6,7 +6,8 @@ import {DashboardPage} from "./pages/DashboartPage";
 import {TeamsList} from "./components/content/team/TeamsList";
 import {CreateTeam} from "./components/content/team/CreateTeam";
 import {Team} from "./components/content/team/Team";
-import {Questions} from "./components/content/Questions";
+import {Questions} from "./components/content/question/Questions";
+import {CreateQuestion} from "./components/content/question/CreateQuestion";
 import {Invitations} from "./components/content/invitation/Invitations";
 import {Profile} from "./components/content/profile/Profile";
 
@@ -21,6 +22,7 @@ function App() {
                     <Route path="teams" element={<TeamsList/>}/>
                     <Route path="teams/create" element={<CreateTeam/>}/>
                     <Route path="teams/:id" element={<Team/>}/>
+                    <Route path="teams/:id/question/create" element={<CreateQuestion/>}/>
                     <Route path="questions" element={<Questions/>}/>
                     <Route path="invitations" element={<Invitations/>}/>
                     <Route path="profile" element={<Profile/>}/>

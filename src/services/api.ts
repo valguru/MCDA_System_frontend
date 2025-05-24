@@ -1,4 +1,5 @@
 import axios from 'axios';
+import {CreateQuestionPayload} from "../types/Question";
 
 const api = axios.create({
     baseURL: 'http://localhost:8080/api',
@@ -67,6 +68,7 @@ export const teamApi = {
 export const questionApi = {
     getQuestionsByTeam: (teamId: number, status: 'ALL' | 'ACTIVE' | 'RESOLVED') =>
         api.get(`/teams/${teamId}/questions?status=${status}`),
+    createQuestion: (teamId: number, data: CreateQuestionPayload) => api.post(`/teams/${teamId}/questions/create`, data),
 };
 
 export default api;
