@@ -9,9 +9,11 @@ import {
     Select,
     MenuItem as MuiMenuItem,
     Stack,
+    Snackbar,
+    Alert,
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { questionApi } from '../../../services/api';
 import { Question } from '../../../types/Question';
@@ -19,27 +21,54 @@ import { scaleTypeLabels, optimizationLabels } from '../../../types/Question';
 
 export const QuestionPreview = () => {
     const { questionId, teamId } = useParams();
+    const navigate = useNavigate();
     const [question, setQuestion] = useState<Question | null>(null);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [answers, setAnswers] = useState<Record<number, Record<string, string>>>({});
+    const [errorMessage, setErrorMessage] = useState('');
+    const [showError, setShowError] = useState(false);
 
     useEffect(() => {
         if (questionId && teamId) {
-            questionApi.getQuestionById(+teamId, +questionId).then(res => {
-                const q: Question = res.data;
-                setQuestion(q);
+            questionApi.getQuestionById(+teamId, +questionId)
+                .then(res => {
+                    const q: Question = res.data;
+                    setQuestion(q);
 
-                const initialAnswers: Record<number, Record<string, string>> = {};
-                q.alternatives.forEach((_, altIndex) => {
-                    initialAnswers[altIndex] = {};
-                    q.criteria.forEach(criterion => {
-                        initialAnswers[altIndex][criterion.name] = '';
+                    const initialAnswers: Record<number, Record<string, string>> = {};
+                    q.alternatives.forEach((_, altIndex) => {
+                        initialAnswers[altIndex] = {};
+                        q.criteria.forEach(criterion => {
+                            initialAnswers[altIndex][criterion.name] = '';
+                        });
                     });
+                    setAnswers(initialAnswers);
+                })
+                .catch(err => {
+                    const message = err?.response?.data?.message || 'Произошла ошибка';
+                    setErrorMessage(message);
+                    setShowError(true);
+
+                    setTimeout(() => {
+                        navigate(`/dashboard/teams`);
+                    }, 3000);
                 });
-                setAnswers(initialAnswers);
-            });
         }
-    }, [teamId, questionId]);
+    }, [teamId, questionId, navigate]);
+
+    if (showError) {
+        return (
+            <Snackbar
+                open={showError}
+                autoHideDuration={3000}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert severity="error" sx={{ width: '100%' }} >
+                    {errorMessage}
+                </Alert>
+            </Snackbar>
+        );
+    }
 
     if (!question) return null;
 
@@ -60,7 +89,7 @@ export const QuestionPreview = () => {
     };
 
     return (
-        <Box sx={{ p: 3 }}>
+        <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography variant="h5">{question.title}</Typography>
 
