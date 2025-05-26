@@ -1,6 +1,6 @@
 import {Expert} from "./Expert";
 
-export type Team = {
+export interface Team {
     id: number;
     name: string;
     description?: string,

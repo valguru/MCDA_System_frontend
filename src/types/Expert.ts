@@ -1,7 +1,7 @@
-export type Expert = {
+export interface Expert {
     id: number;
     name: string;
     email: string;
-    surname: string,
-    position: string
-};
+    surname?: string,
+    position?: string
+}

@@ -13,13 +13,15 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import StarIcon from '@mui/icons-material/Star';
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { teamApi, questionApi } from '../../../services/api';
-import { Team as TeamType } from '../../../types/Team';
+import {useEffect, useState} from 'react';
+import {useParams, useNavigate} from 'react-router-dom';
+import {teamApi, questionApi} from '../../../services/api';
+import {Team as TeamType} from '../../../types/Team';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import {QuestionStatus} from "../../../types/Question";
 
 export const Team = () => {
-    const { id } = useParams<{ id: string }>();
+    const {id} = useParams<{ id: string }>();
     const navigate = useNavigate();
 
     const [team, setTeam] = useState<TeamType | null>(null);
@@ -52,8 +54,10 @@ export const Team = () => {
         if (!id) return;
 
         setLoading(true);
-        // Мапим табы к статусам вопроса с бэкенда
-        const status = tab === 0 ? 'ACTIVE' : 'RESOLVED';
+        let status: QuestionStatus;
+        if (tab === 0) status = 'ACTIVE';
+        else if (tab === 1) status = 'RESOLVED';
+        else status = 'DRAFT';
 
         questionApi.getQuestionsByTeam(+id, status)
             .then(res => {
@@ -68,7 +72,7 @@ export const Team = () => {
     }, [id, tab]);
 
     if (loading) {
-        return <CircularProgress sx={{ mt: 4 }} />;
+        return <CircularProgress sx={{mt: 4}}/>;
     }
 
     if (!team) {
@@ -87,13 +91,13 @@ export const Team = () => {
     }
 
     return (
-        <Box sx={{ display: 'flex', gap: 4 }}>
-            <Box sx={{ flex: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+        <Box sx={{display: 'flex', gap: 4}}>
+            <Box sx={{flex: 1}}>
+                <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2}}>
                     <Typography variant="h5">{team.name}</Typography>
                     <Tooltip title="Редактировать команду">
                         <IconButton color="primary" size="small">
-                            <EditIcon />
+                            <EditIcon/>
                         </IconButton>
                     </Tooltip>
                 </Box>
@@ -116,17 +120,18 @@ export const Team = () => {
                     <Tabs
                         value={tab}
                         onChange={(_, newValue) => setTab(newValue)}
-                        sx={{ minHeight: '40px' }}
+                        sx={{minHeight: '40px'}}
                     >
-                        <Tab label="Активные вопросы" sx={{ minHeight: '40px' }} />
-                        <Tab label="Решенные вопросы" sx={{ minHeight: '40px' }} />
+                        <Tab label="Активные вопросы" sx={{minHeight: '40px'}}/>
+                        <Tab label="Решенные вопросы" sx={{minHeight: '40px'}}/>
+                        <Tab label="Черновики" sx={{minHeight: '40px'}}/>
                     </Tabs>
 
                     <Button
                         variant="outlined"
-                        startIcon={<AddIcon />}
+                        startIcon={<AddIcon/>}
                         size="small"
-                        sx={{ ml: 2 }}
+                        sx={{ml: 2}}
                         onClick={() => navigate(`/dashboard/teams/${id}/question/create`)}
                     >
                         Создать вопрос
@@ -138,16 +143,35 @@ export const Team = () => {
                 ) : (
                     <Stack spacing={2}>
                         {questions.map((q) => (
-                            <Paper key={q.id} sx={{ p: 2 }}>
-                                <Typography variant="subtitle1">{q.title}</Typography>
-                                <Typography color="text.secondary" sx={{ mb: 0.5 }}>
-                                    {q.description}
-                                </Typography>
-                                {q.createdBy && (
-                                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                                        Автор: {q.createdBy.name}{q.createdBy.surname ? ` ${q.createdBy.surname}` : ''}
-                                    </Typography>
-                                )}
+                            <Paper
+                                key={q.id}
+                                sx={{p: 2, cursor: 'pointer', '&:hover': {backgroundColor: 'action.hover'},}}
+                                onDoubleClick={() => navigate(`/dashboard/teams/${id}/question/${q.id}`)}
+                            >
+                                <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                                    <Box>
+                                        <Typography variant="subtitle1">{q.title}</Typography>
+                                        <Typography color="text.secondary" sx={{mb: 0.5}}>
+                                            {q.description}
+                                        </Typography>
+                                        {q.createdBy && (
+                                            <Typography variant="body2" color="text.secondary"
+                                                        sx={{fontSize: '0.75rem'}}>
+                                                Автор: {q.createdBy.name}{q.createdBy.surname ? ` ${q.createdBy.surname}` : ''}
+                                            </Typography>
+                                        )}
+                                    </Box>
+                                    <IconButton
+                                        color="primary"
+                                        size="small"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`/dashboard/teams/${id}/question/${q.id}`);
+                                        }}
+                                    >
+                                        <ArrowForwardIcon/>
+                                    </IconButton>
+                                </Box>
                             </Paper>
                         ))}
 
@@ -155,7 +179,7 @@ export const Team = () => {
                 )}
             </Box>
 
-            <Box sx={{ width: 280 }}>
+            <Box sx={{width: 280}}>
                 <Typography variant="h6" mb={2}>
                     Участники
                 </Typography>
@@ -166,8 +190,8 @@ export const Team = () => {
                     ].map((m) => {
                         const isCreator = m.id === team.createdBy.id;
                         return (
-                            <Paper key={m.id} sx={{ p: 1.5, display: 'flex', flexDirection: 'column' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Paper key={m.id} sx={{p: 1.5, display: 'flex', flexDirection: 'column'}}>
+                                <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
                                     <Typography
                                         sx={{
                                             fontWeight: isCreator ? 'bold' : 'normal',
@@ -178,14 +202,14 @@ export const Team = () => {
                                     </Typography>
                                     {isCreator && (
                                         <Tooltip title="Создатель команды">
-                                            <StarIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+                                            <StarIcon sx={{fontSize: 18, color: 'primary.main'}}/>
                                         </Tooltip>
                                     )}
                                 </Box>
                                 <Typography
                                     variant="body2"
                                     color="text.secondary"
-                                    sx={{ fontSize: '0.8rem', mt: 0.3 }}
+                                    sx={{fontSize: '0.8rem', mt: 0.3}}
                                 >
                                     {m.email}
                                 </Typography>

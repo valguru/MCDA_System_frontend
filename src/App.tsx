@@ -10,6 +10,7 @@ import {Questions} from "./components/content/question/Questions";
 import {CreateQuestion} from "./components/content/question/CreateQuestion";
 import {Invitations} from "./components/content/invitation/Invitations";
 import {Profile} from "./components/content/profile/Profile";
+import {QuestionPreview} from "./components/content/question/QuestionPreview";
 
 function App() {
     return (
@@ -23,6 +24,7 @@ function App() {
                     <Route path="teams/create" element={<CreateTeam/>}/>
                     <Route path="teams/:id" element={<Team/>}/>
                     <Route path="teams/:id/question/create" element={<CreateQuestion/>}/>
+                    <Route path="teams/:teamId/question/:questionId" element={<QuestionPreview/>}/>
                     <Route path="questions" element={<Questions/>}/>
                     <Route path="invitations" element={<Invitations/>}/>
                     <Route path="profile" element={<Profile/>}/>
