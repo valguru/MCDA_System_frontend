@@ -52,9 +52,7 @@ export const userApi = {
 
 export const teamApi = {
     getMyTeams: () => api.get('/teams'),
-    getTeamById(teamId: number) {
-        return api.get(`/teams/${teamId}`);
-    },
+    getTeamById: (teamId: number) => api.get(`/teams/${teamId}`),
     createTeam: (data: { name: string; description?: string, emails: string[] }) =>
         api.post('/teams/create', data),
     getSentInvites: () => api.get('/invitations/sent'),
@@ -71,6 +69,8 @@ export const questionApi = {
     createQuestion: (teamId: number, data: CreateQuestionPayload) => api.post(`/teams/${teamId}/questions/create`, data),
     getQuestionById: (teamId: number, questionId: number) =>
         api.get(`/teams/${teamId}/questions/${questionId}`),
+    activateQuestion: (teamId: number, questionId: number) =>
+        api.patch(`/teams/${teamId}/questions/${questionId}/activate`)
 };
 
 export default api;

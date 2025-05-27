@@ -22,11 +22,14 @@ import { scaleTypeLabels, optimizationLabels } from '../../../types/Question';
 export const QuestionPreview = () => {
     const { questionId, teamId } = useParams();
     const navigate = useNavigate();
+
     const [question, setQuestion] = useState<Question | null>(null);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [answers, setAnswers] = useState<Record<number, Record<string, string>>>({});
     const [errorMessage, setErrorMessage] = useState('');
     const [showError, setShowError] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    const [showSuccess, setShowSuccess] = useState(false);
 
     useEffect(() => {
         if (questionId && teamId) {
@@ -56,25 +59,6 @@ export const QuestionPreview = () => {
         }
     }, [teamId, questionId, navigate]);
 
-    if (showError) {
-        return (
-            <Snackbar
-                open={showError}
-                autoHideDuration={3000}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-            >
-                <Alert severity="error" sx={{ width: '100%' }} >
-                    {errorMessage}
-                </Alert>
-            </Snackbar>
-        );
-    }
-
-    if (!question) return null;
-
-    const isDraft = question.status === 'DRAFT';
-    const isActive = question.status === 'ACTIVE';
-
     const handleMenuOpen = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
     const handleMenuClose = () => setAnchorEl(null);
 
@@ -88,9 +72,47 @@ export const QuestionPreview = () => {
         }));
     };
 
+    const handleActivateQuestion = () => {
+        if (!teamId || !questionId) return;
+
+        questionApi.activateQuestion(+teamId, +questionId)
+            .then(res => {
+                const msg = res.data?.message || 'Вопрос активирован';
+                setSuccessMessage(msg);
+                setShowSuccess(true);
+
+                setQuestion(prev => prev ? { ...prev, status: 'ACTIVE' } : prev);
+            })
+            .catch(err => {
+                const msg = err?.response?.data?.message || 'Не удалось активировать вопрос';
+                setErrorMessage(msg);
+                setShowError(true);
+            });
+    };
+
+    if (showError) {
+        return (
+            <Snackbar
+                open={showError}
+                autoHideDuration={3000}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                onClose={() => setShowError(false)}
+            >
+                <Alert severity="error" sx={{ width: '100%' }} >
+                    {errorMessage}
+                </Alert>
+            </Snackbar>
+        );
+    }
+
+    if (!question) return null;
+
+    const isDraft = question.status === 'DRAFT';
+    const isActive = question.status === 'ACTIVE';
+
     return (
         <Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                 <Typography variant="h5">{question.title}</Typography>
 
                 <Stack direction="row" spacing={1}>
@@ -98,7 +120,7 @@ export const QuestionPreview = () => {
                         <Button
                             variant="contained"
                             size="small"
-                            onClick={() => {/* TODO: запустить опрос */}}
+                            onClick={handleActivateQuestion}
                         >
                             Запустить опрос
                         </Button>
@@ -128,12 +150,12 @@ export const QuestionPreview = () => {
             </Box>
 
             {question.description && (
-                <Typography color="text.secondary" sx={{ mt: 1, mb: 3 }}>
+                <Typography color="text.secondary">
                     {question.description}
                 </Typography>
             )}
 
-            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mt: 3 }}>
                 {question.alternatives.map((alt, altIndex) => (
                     <Paper
                         key={altIndex}
@@ -173,6 +195,19 @@ export const QuestionPreview = () => {
                     </Paper>
                 ))}
             </Box>
+
+            {showSuccess && (
+                <Snackbar
+                    open={showSuccess}
+                    autoHideDuration={3000}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                    onClose={() => setShowSuccess(false)}
+                >
+                    <Alert severity="success" sx={{ width: '100%' }}>
+                        {successMessage}
+                    </Alert>
+                </Snackbar>
+            )}
         </Box>
     );
 };
