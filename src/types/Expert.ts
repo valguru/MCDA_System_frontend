@@ -5,3 +5,8 @@ export interface Expert {
     surname?: string,
     position?: string
 }
+
+export interface ParticipantsResponse {
+    responded: Expert[];
+    pending: Expert[];
+}

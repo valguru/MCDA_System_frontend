@@ -28,7 +28,7 @@ api.interceptors.response.use(
 
 export const authApi = {
     login: (email: string, password: string) =>
-        api.post('/auth/login', { email, password }),
+        api.post('/auth/login', {email, password}),
     register: (
         email: string,
         password: string,
@@ -47,30 +47,38 @@ export const authApi = {
 
 
 export const userApi = {
-    getCurrentUser: () => api.get('/user')
+    getCurrentUser: () =>
+        api.get('/user')
 };
 
 export const teamApi = {
-    getMyTeams: () => api.get('/teams'),
-    getTeamById: (teamId: number) => api.get(`/teams/${teamId}`),
+    getMyTeams: () =>
+        api.get('/teams'),
+    getTeamById: (teamId: number) =>
+        api.get(`/teams/${teamId}`),
     createTeam: (data: { name: string; description?: string, emails: string[] }) =>
         api.post('/teams/create', data),
-    getSentInvites: () => api.get('/invitations/sent'),
-    getReceivedInvites: () => api.get('/invitations/received'),
+    getSentInvites: () =>
+        api.get('/invitations/sent'),
+    getReceivedInvites: () =>
+        api.get('/invitations/received'),
     respondToInvite: (id: number, accepted: boolean) =>
         api.post(`/invitations/${id}/respond`, null, {
-            params: { accepted }
+            params: {accepted}
         })
 };
 
 export const questionApi = {
     getQuestionsByTeam: (teamId: number, status: QuestionStatus) =>
         api.get(`/teams/${teamId}/questions?status=${status}`),
-    createQuestion: (teamId: number, data: CreateQuestionPayload) => api.post(`/teams/${teamId}/questions/create`, data),
+    createQuestion: (teamId: number, data: CreateQuestionPayload) =>
+        api.post(`/teams/${teamId}/questions/create`, data),
     getQuestionById: (teamId: number, questionId: number) =>
         api.get(`/teams/${teamId}/questions/${questionId}`),
     activateQuestion: (teamId: number, questionId: number) =>
-        api.patch(`/teams/${teamId}/questions/${questionId}/activate`)
+        api.patch(`/teams/${teamId}/questions/${questionId}/activate`),
+    getParticipants: (teamId: number, questionId: number) =>
+        api.get(`/teams/${teamId}/questions/${questionId}/participants`)
 };
 
 export default api;
