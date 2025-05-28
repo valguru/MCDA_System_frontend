@@ -5,7 +5,7 @@ export const HomePage = () => {
     return (
         <Box sx={{ textAlign: 'center', mt: 8 }}>
             <Typography variant="h4" gutterBottom>
-                Средство группового принятия решений в Agile-командах
+                Система поддержки группового принятия решений в Agile-командах
             </Typography>
 
             <Box sx={{ mt: 4 }}>

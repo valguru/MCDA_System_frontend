@@ -12,7 +12,7 @@ export const AppHeader = () => {
         >
             <Toolbar>
                 <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                    Система поддержки принятия решений в Agile-командах
+                    Система поддержки группового принятия решений в Agile-командах
                 </Typography>
 
                 <Tooltip title="Профиль">
