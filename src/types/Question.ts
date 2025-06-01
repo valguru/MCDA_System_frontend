@@ -2,7 +2,12 @@ import {Expert} from "./Expert";
 
 export type ScaleType = 'LONG' | 'BASE' | 'SHORT' | 'NUMERIC';
 export type OptimizationDirection = 'MAX' | 'MIN';
-export type QuestionStatus = 'DRAFT' | 'ACTIVE' | 'RESOLVED';
+export type QuestionStatus = 'DRAFT' | 'ACTIVE' | 'AWAITING_DECISION' |'RESOLVED';
+
+export interface QuestionsFilterPayload {
+    teamId: number;
+    status?: QuestionStatus | 'ALL';
+}
 
 export interface Criterion {
     name: string;
@@ -10,7 +15,8 @@ export interface Criterion {
     optimization: OptimizationDirection;
 }
 
-export interface CreateQuestionPayload {
+export interface QuestionCreatePayload {
+    teamId: number;
     title: string;
     description?: string;
     alternatives: string[];

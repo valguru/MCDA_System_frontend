@@ -25,7 +25,7 @@ import { useCurrentUser } from '../../../hooks/useCurrentUser';
 import {Expert, ParticipantsResponse} from '../../../types/Expert';
 
 export const QuestionPreview = () => {
-    const { questionId, teamId } = useParams();
+    const { questionId } = useParams();
     const navigate = useNavigate();
     const { user } = useCurrentUser();
 
@@ -40,8 +40,8 @@ export const QuestionPreview = () => {
     const [pendingExperts, setPendingExperts] = useState<Expert[]>([]);
 
     useEffect(() => {
-        if (questionId && teamId) {
-            questionApi.getQuestionById(+teamId, +questionId)
+        if (questionId) {
+            questionApi.getQuestionById(+questionId)
                 .then(res => {
                     const q: Question = res.data;
                     setQuestion(q);
@@ -64,7 +64,7 @@ export const QuestionPreview = () => {
                     }, 3000);
                 });
 
-            questionApi.getParticipants(+teamId, +questionId)
+            questionApi.getParticipants(+questionId)
                 .then(res => {
                     const data = res.data as ParticipantsResponse;
                     setRespondedExperts(data.responded || []);
@@ -75,7 +75,7 @@ export const QuestionPreview = () => {
                     setShowError(true);
                 });
         }
-    }, [teamId, questionId, navigate]);
+    }, [questionId, navigate]);
 
     const handleMenuOpen = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
     const handleMenuClose = () => setAnchorEl(null);
@@ -91,9 +91,7 @@ export const QuestionPreview = () => {
     };
 
     const handleActivateQuestion = () => {
-        if (!teamId || !questionId) return;
-
-        questionApi.activateQuestion(+teamId, +questionId)
+        questionApi.activateQuestion(+questionId!)
             .then(res => {
                 const msg = res.data?.message || 'Вопрос активирован';
                 setSuccessMessage(msg);

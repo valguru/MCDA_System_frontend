@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {CreateQuestionPayload, QuestionStatus} from "../types/Question";
+import {QuestionCreatePayload, QuestionsFilterPayload} from "../types/Question";
 
 const api = axios.create({
     baseURL: `${process.env.REACT_APP_API_URL}/api`,
@@ -69,16 +69,16 @@ export const teamApi = {
 };
 
 export const questionApi = {
-    getQuestionsByTeam: (teamId: number, status: QuestionStatus) =>
-        api.get(`/teams/${teamId}/questions?status=${status}`),
-    createQuestion: (teamId: number, data: CreateQuestionPayload) =>
-        api.post(`/teams/${teamId}/questions/create`, data),
-    getQuestionById: (teamId: number, questionId: number) =>
-        api.get(`/teams/${teamId}/questions/${questionId}`),
-    activateQuestion: (teamId: number, questionId: number) =>
-        api.patch(`/teams/${teamId}/questions/${questionId}/activate`),
-    getParticipants: (teamId: number, questionId: number) =>
-        api.get(`/teams/${teamId}/questions/${questionId}/participants`)
+    getQuestionsByTeam: (payload: QuestionsFilterPayload) =>
+        api.post(`/questions`, payload),
+    createQuestion: (data: QuestionCreatePayload) =>
+        api.post(`/questions/create`, data),
+    getQuestionById: (questionId: number) =>
+        api.get(`/questions/${questionId}`),
+    activateQuestion: (questionId: number) =>
+        api.patch(`/questions/${questionId}/activate`),
+    getParticipants: (questionId: number) =>
+        api.get(`/questions/${questionId}/participants`)
 };
 
 export default api;

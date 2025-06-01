@@ -59,7 +59,7 @@ export const Team = () => {
         else if (tab === 1) status = 'RESOLVED';
         else status = 'DRAFT';
 
-        questionApi.getQuestionsByTeam(+id, status)
+        questionApi.getQuestionsByTeam({teamId: +id, status})
             .then(res => {
                 setQuestions(res.data);
                 setLoading(false);

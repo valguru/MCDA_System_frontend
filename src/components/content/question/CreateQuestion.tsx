@@ -64,9 +64,7 @@ export const CreateQuestion = () => {
 
 
     useEffect(() => {
-        if (!teamId) return;
-
-        teamApi.getTeamById(+teamId)
+        teamApi.getTeamById(+teamId!)
             .then((res) => setTeam(res.data))
             .catch((err) => {
                 if (err.response?.status === 403) {
@@ -111,7 +109,8 @@ export const CreateQuestion = () => {
         }
 
         try {
-            await questionApi.createQuestion( +teamId!, {
+            await questionApi.createQuestion({
+                teamId: +teamId!,
                 title: trimmedTitle,
                 description: description.trim() || undefined,
                 alternatives: validAlternatives,
