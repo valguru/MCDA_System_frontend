@@ -10,9 +10,15 @@ export interface QuestionsFilterPayload {
 }
 
 export interface Criterion {
+    id?: number;
     name: string;
     scaleType: ScaleType;
     optimization: OptimizationDirection;
+}
+
+export interface Alternative {
+    id: number;
+    value: string;
 }
 
 export interface QuestionCreatePayload {
@@ -27,7 +33,7 @@ export interface Question {
     id: number;
     title: string;
     description?: string;
-    alternatives: string[];
+    alternatives: Alternative[];
     criteria: Criterion[];
     status: QuestionStatus;
     createdAt: string;

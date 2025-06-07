@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {QuestionCreatePayload, QuestionsFilterPayload} from "../types/Question";
+import {RatingCreateRequest} from "../types/Rating";
 
 const api = axios.create({
     baseURL: `${process.env.REACT_APP_API_URL}/api`,
@@ -79,6 +80,17 @@ export const questionApi = {
         api.patch(`/questions/${questionId}/activate`),
     getParticipants: (questionId: number) =>
         api.get(`/questions/${questionId}/participants`)
+};
+
+export const ratingApi = {
+    submitRatings: (rating: RatingCreateRequest) => {
+        return api.post('/ratings/add', rating);
+    },
+    getRatingsByQuestion: (questionId: number) => {
+        return api.get(`/ratings/by_question`, {
+            params: { questionId },
+        });
+    },
 };
 
 export default api;

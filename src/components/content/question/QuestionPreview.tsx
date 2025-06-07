@@ -18,11 +18,12 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import StarIcon from '@mui/icons-material/Star';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { questionApi } from '../../../services/api';
+import {questionApi, ratingApi} from '../../../services/api';
 import { Question } from '../../../types/Question';
 import { scaleTypeLabels, optimizationLabels } from '../../../types/Question';
 import { useCurrentUser } from '../../../hooks/useCurrentUser';
 import {Expert, ParticipantsResponse} from '../../../types/Expert';
+import {RatingAnswer, RatingCreateRequest, ratingOptionsByScale} from "../../../types/Rating";
 
 export const QuestionPreview = () => {
     const { questionId } = useParams();
@@ -38,6 +39,7 @@ export const QuestionPreview = () => {
     const [showSuccess, setShowSuccess] = useState(false);
     const [respondedExperts, setRespondedExperts] = useState<Expert[]>([]);
     const [pendingExperts, setPendingExperts] = useState<Expert[]>([]);
+    const [hasResponded, setHasResponded] = useState<boolean>(false);
 
     useEffect(() => {
         if (questionId) {
@@ -45,7 +47,7 @@ export const QuestionPreview = () => {
                 .then(res => {
                     const q: Question = res.data;
                     setQuestion(q);
-
+                    getAnswers(q)
                     const initialAnswers: Record<number, Record<string, string>> = {};
                     q.alternatives.forEach((_, altIndex) => {
                         initialAnswers[altIndex] = {};
@@ -77,6 +79,26 @@ export const QuestionPreview = () => {
         }
     }, [questionId, navigate]);
 
+    const getAnswers = (q: Question) => {
+        ratingApi.getRatingsByQuestion(+q.id)
+            .then(res => {
+                const existingRatings = res.data as RatingAnswer[];
+
+                const filledAnswers: Record<number, Record<string, string>> = {};
+                q.alternatives.forEach((alt, altIndex) => {
+                    filledAnswers[altIndex] = {};
+                    q.criteria.forEach(criterion => {
+                        const rating = existingRatings.find(r =>
+                            r.alternativeId === alt.id && r.criteriaId === criterion.id
+                        );
+                        filledAnswers[altIndex][criterion.name] = rating?.value || '';
+                    });
+                });
+                setAnswers(filledAnswers);
+                setHasResponded(!!existingRatings.length)
+            })
+    }
+
     const handleMenuOpen = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
     const handleMenuClose = () => setAnchorEl(null);
 
@@ -100,6 +122,44 @@ export const QuestionPreview = () => {
             })
             .catch(err => {
                 const msg = err?.response?.data?.message || 'Не удалось активировать вопрос';
+                setErrorMessage(msg);
+                setShowError(true);
+            });
+    };
+
+    const handleSubmitAnswers = () => {
+        if (!question || !questionId) return;
+
+        const ratings: RatingAnswer[] = question.alternatives.flatMap((alt) =>
+            question.criteria.map((criterion) => ({
+                alternativeId: alt.id,
+                criteriaId: criterion.id!,
+                value: answers[question.alternatives.indexOf(alt)]?.[criterion.name] ?? '',
+            }))
+        );
+
+        const hasEmpty = ratings.some(r => !r.value);
+        if (hasEmpty) {
+            setErrorMessage('Пожалуйста, заполните все оценки перед отправкой');
+            setShowError(true);
+            return;
+        }
+
+        const payload: RatingCreateRequest = {
+            questionId: +questionId,
+            answers: ratings,
+        };
+
+        ratingApi.submitRatings(payload)
+            .then(res => {
+                setSuccessMessage(res.data?.message || 'Ответ отправлен');
+                setShowSuccess(true);
+                setRespondedExperts(prev => [...prev, user!]);
+                setPendingExperts(prev => prev.filter(e => e.email !== user?.email));
+                setHasResponded(true)
+            })
+            .catch(err => {
+                const msg = err?.response?.data?.message || 'Ошибка при отправке ответа';
                 setErrorMessage(msg);
                 setShowError(true);
             });
@@ -138,9 +198,18 @@ export const QuestionPreview = () => {
                         )}
                         {isActive && (
                             <>
-                                <Button variant="contained" size="small" onClick={() => { /* TODO: отправить ответ */ }}>
-                                    Отправить ответ
-                                </Button>
+                                <Tooltip title={hasResponded ? 'Вы уже отправили ответ' : ''}>
+                                    <span>
+                                        <Button
+                                            variant="contained"
+                                            size="small"
+                                            disabled={hasResponded}
+                                            onClick={handleSubmitAnswers}
+                                        >
+                                            Отправить ответ
+                                        </Button>
+                                    </span>
+                                </Tooltip>
                                 {isAuthor && (
                                     <Button variant="outlined" size="small" onClick={() => { /* TODO: завершить опрос */ }}>
                                         Завершить опрос
@@ -171,13 +240,13 @@ export const QuestionPreview = () => {
 
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mt: 3 }}>
                     {question.alternatives.map((alt, altIndex) => (
-                        <Paper key={altIndex} sx={{ p: 2, opacity: isDraft ? 0.6 : 1 }} elevation={isDraft ? 1 : 3}>
+                        <Paper key={alt.id} sx={{ p: 2, opacity: isDraft ? 0.6 : 1 }} elevation={isDraft ? 1 : 3}>
                             <Typography variant="subtitle1" gutterBottom>
-                                Вариант {altIndex + 1}: {alt}
+                                Вариант {altIndex + 1}: {alt.value}
                             </Typography>
 
                             {question.criteria.map((criterion) => (
-                                <Box key={criterion.name} sx={{ mb: 2 }}>
+                                <Box key={criterion.id} sx={{ mb: 2 }}>
                                     <Typography variant="body2" fontWeight="bold" sx={{ mb: 1 }}>
                                         {criterion.name}
                                     </Typography>
@@ -185,16 +254,16 @@ export const QuestionPreview = () => {
                                         size="small"
                                         displayEmpty
                                         fullWidth
-                                        disabled={isDraft}
+                                        disabled={isDraft || hasResponded}
                                         value={answers[altIndex]?.[criterion.name] || ''}
                                         onChange={e => handleAnswerChange(altIndex, criterion.name, e.target.value)}
                                         renderValue={(selected) =>
                                             selected || `${scaleTypeLabels[criterion.scaleType]} / ${optimizationLabels[criterion.optimization]}`
                                         }
                                     >
-                                        {[1, 2, 3, 4, 5].map(val => (
-                                            <MuiMenuItem key={val} value={String(val)}>
-                                                {val}
+                                        {ratingOptionsByScale[criterion.scaleType].map((option) => (
+                                            <MuiMenuItem key={option.value} value={option.value}>
+                                                {option.label}
                                             </MuiMenuItem>
                                         ))}
                                     </Select>
