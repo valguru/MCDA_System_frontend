@@ -81,7 +81,9 @@ export const questionApi = {
     markAwaitingDecisionQuestion: (questionId: number) =>
         api.patch(`/questions/${questionId}/await_decision`),
     getParticipants: (questionId: number) =>
-        api.get(`/questions/${questionId}/participants`)
+        api.get(`/questions/${questionId}/participants`),
+    resolveQuestion: (questionId: number, selectedAlternativeId: number) =>
+        api.patch(`/questions/${questionId}/resolve`, { selectedAlternativeId })
 };
 
 export const ratingApi = {

@@ -38,7 +38,11 @@ export const QuestionDecisionView = () => {
     const {user} = useCurrentUser();
 
     const [error, setError] = useState<string | null>(null);
-    const [showSnackbar, setShowSnackbar] = useState(false);
+    const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
+
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
 
     const isCreator = user?.email === question?.createdBy.email
 
@@ -61,12 +65,12 @@ export const QuestionDecisionView = () => {
 
                 if (questionRes.data.status === 'RESOLVED') {
                     // предполагаем, что в вопросе уже есть инфа о принятом решении
-                    const resolvedAltId = topsisRes.data.finalDecisionId ?? null;
+                    const resolvedAltId = questionRes?.data?.selectedAlternative?.id ?? null;
                     setFinalDecisionId(resolvedAltId);
                 }
             } catch (error) {
                 setError('Не удалось загрузить данные. Возврат на страницу команд...');
-                setShowSnackbar(true);
+                setShowErrorSnackbar(true);
                 setTimeout(() => navigate('/dashboard/teams'), 3000);
             } finally {
                 setLoading(false);
@@ -76,30 +80,39 @@ export const QuestionDecisionView = () => {
         loadData();
     }, [questionId]);
 
-    const handleDecision = async () => {
-        if (!selectedAltId) return;
+    const handleDecision = () => {
+        if (!selectedAltId) {
+            setSnackbarMessage('Выберите вариант решения');
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+            return;
+        }
 
-        // try {
-        //     // Отправка решения на бэк
-        //     await api.post(`/questions/${questionId}/resolve`, {
-        //         alternativeId: selectedAltId,
-        //     });
-        //     setFinalDecisionId(selectedAltId);
-        //     setQuestion((prev) =>
-        //         prev ? {...prev, status: 'RESOLVED'} : prev
-        //     );
-        // } catch (e) {
-        //     console.error('Ошибка при принятии решения:', e);
-        // }
+        questionApi
+            .resolveQuestion(+questionId!, selectedAltId)
+            .then(() => {
+                setFinalDecisionId(selectedAltId);
+                setQuestion((prev) =>
+                    prev ? {...prev, status: 'RESOLVED'} : prev
+                );
+                setSnackbarMessage('Вопрос успешно решён');
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+            })
+            .catch((e) => {
+                setSnackbarMessage('Не удалось завершить вопрос');
+                setSnackbarSeverity('error');
+                setSnackbarOpen(true);
+            });
     };
 
     if (error) {
         return (
             <Snackbar
-                open={showSnackbar}
+                open={showErrorSnackbar}
                 autoHideDuration={3000}
                 anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
-                onClose={() => setShowSnackbar(false)}
+                onClose={() => setShowErrorSnackbar(false)}
             >
                 <Alert severity="error" sx={{width: '100%'}}>
                     {error}
@@ -282,7 +295,16 @@ export const QuestionDecisionView = () => {
                 </Box>
             </Box>
 
-
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={3000}
+                onClose={() => setSnackbarOpen(false)}
+                anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
+            >
+                <Alert severity={snackbarSeverity} sx={{width: '100%'}}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 }
