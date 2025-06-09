@@ -51,5 +51,3 @@ export const optimizationLabels: Record<OptimizationDirection, string> = {
     MIN: 'Минимизация',
     MAX: 'Максимизация',
 };
-
-

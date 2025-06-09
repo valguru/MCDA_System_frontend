@@ -55,9 +55,22 @@ export const Team = () => {
 
         setLoading(true);
         let status: QuestionStatus;
-        if (tab === 0) status = 'ACTIVE';
-        else if (tab === 1) status = 'RESOLVED';
-        else status = 'DRAFT';
+        switch (tab) {
+            case 0:
+                status = 'ACTIVE';
+                break;
+            case 1:
+                status = 'RESOLVED';
+                break;
+            case 2:
+                status = 'AWAITING_DECISION';
+                break;
+            case 3:
+                status = 'DRAFT';
+                break;
+            default:
+                status = 'ACTIVE';
+        }
 
         questionApi.getQuestionsByTeam({teamId: +id, status})
             .then(res => {
@@ -119,12 +132,15 @@ export const Team = () => {
                 >
                     <Tabs
                         value={tab}
+                        variant="scrollable"
+                        scrollButtons="auto"
                         onChange={(_, newValue) => setTab(newValue)}
-                        sx={{minHeight: '40px'}}
+                        sx={{minHeight: '55px'}}
                     >
-                        <Tab label="Активные вопросы" sx={{minHeight: '40px'}}/>
-                        <Tab label="Решенные вопросы" sx={{minHeight: '40px'}}/>
-                        <Tab label="Черновики" sx={{minHeight: '40px'}}/>
+                        <Tab label="Активные вопросы" sx={{minHeight: '55px'}}/>
+                        <Tab label="Решенные вопросы" sx={{minHeight: '55px'}}/>
+                        <Tab label="Ожидают решения" sx={{ minHeight: '55px' }} />
+                        <Tab label="Черновики" sx={{minHeight: '55px'}}/>
                     </Tabs>
 
                     <Button
@@ -146,7 +162,13 @@ export const Team = () => {
                             <Paper
                                 key={q.id}
                                 sx={{p: 2, cursor: 'pointer', '&:hover': {backgroundColor: 'action.hover'},}}
-                                onDoubleClick={() => navigate(`/dashboard/teams/${id}/question/${q.id}`)}
+                                onDoubleClick={() => {
+                                    if (['DRAFT', 'ACTIVE'].includes(q.status)){
+                                        navigate(`/dashboard/teams/${id}/question/${q.id}`)
+                                    } else if (['AWAITING_DECISION', 'RESOLVED'].includes(q.status)) {
+                                        navigate(`/dashboard/teams/${id}/question/${q.id}/view`)
+                                    }
+                                }}
                             >
                                 <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                                     <Box>
@@ -166,7 +188,11 @@ export const Team = () => {
                                         size="small"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            navigate(`/dashboard/teams/${id}/question/${q.id}`);
+                                            if (['DRAFT', 'ACTIVE'].includes(q.status)){
+                                                navigate(`/dashboard/teams/${id}/question/${q.id}`)
+                                            } else if (['AWAITING_DECISION', 'RESOLVED'].includes(q.status)) {
+                                                navigate(`/dashboard/teams/${id}/question/${q.id}/view`)
+                                            }
                                         }}
                                     >
                                         <ArrowForwardIcon/>

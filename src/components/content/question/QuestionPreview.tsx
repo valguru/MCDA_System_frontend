@@ -16,19 +16,19 @@ import {
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import StarIcon from '@mui/icons-material/Star';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import {useParams, useNavigate} from 'react-router-dom';
+import {useState, useEffect} from 'react';
 import {questionApi, ratingApi} from '../../../services/api';
-import { Question } from '../../../types/Question';
-import { scaleTypeLabels, optimizationLabels } from '../../../types/Question';
-import { useCurrentUser } from '../../../hooks/useCurrentUser';
+import {Question} from '../../../types/Question';
+import {scaleTypeLabels, optimizationLabels} from '../../../types/Question';
+import {useCurrentUser} from '../../../hooks/useCurrentUser';
 import {Expert, ParticipantsResponse} from '../../../types/Expert';
 import {RatingAnswer, RatingCreateRequest, ratingOptionsByScale} from "../../../types/Rating";
 
 export const QuestionPreview = () => {
-    const { questionId } = useParams();
+    const {teamId, questionId} = useParams();
     const navigate = useNavigate();
-    const { user } = useCurrentUser();
+    const {user} = useCurrentUser();
 
     const [question, setQuestion] = useState<Question | null>(null);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -118,7 +118,7 @@ export const QuestionPreview = () => {
                 const msg = res.data?.message || 'Вопрос активирован';
                 setSuccessMessage(msg);
                 setShowSuccess(true);
-                setQuestion(prev => prev ? { ...prev, status: 'ACTIVE' } : prev);
+                setQuestion(prev => prev ? {...prev, status: 'ACTIVE'} : prev);
             })
             .catch(err => {
                 const msg = err?.response?.data?.message || 'Не удалось активировать вопрос';
@@ -165,15 +165,32 @@ export const QuestionPreview = () => {
             });
     };
 
+    const handleFinishPoll = async () => {
+        try {
+            if (!questionId) return;
+
+            questionApi.markAwaitingDecisionQuestion(Number(questionId))
+                .then(res => {
+                    setSuccessMessage('Опрос успешно завершён');
+                    setShowSuccess(true);
+                    navigate(`/dashboard/teams/${teamId}/question/${questionId}/view`)
+                });
+
+        } catch (error) {
+            setErrorMessage('Не удалось завершить опрос');
+            setShowError(true);
+        }
+    };
+
     if (!question) {
         return (
             <Snackbar
                 open={showError}
                 autoHideDuration={3000}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
                 onClose={() => setShowError(false)}
             >
-                <Alert severity="error" sx={{ width: '100%' }} >
+                <Alert severity="error" sx={{width: '100%'}}>
                     {errorMessage}
                 </Alert>
             </Snackbar>
@@ -185,9 +202,9 @@ export const QuestionPreview = () => {
     const isActive = question?.status === 'ACTIVE';
 
     return (
-        <Box sx={{ display: 'flex', gap: 4 }}>
-            <Box sx={{ flex: 3 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+        <Box sx={{display: 'flex', gap: 4}}>
+            <Box sx={{flex: 3}}>
+                <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1}}>
                     <Typography variant="h5">{question.title}</Typography>
 
                     <Stack direction="row" spacing={1}>
@@ -211,15 +228,17 @@ export const QuestionPreview = () => {
                                     </span>
                                 </Tooltip>
                                 {isAuthor && (
-                                    <Button variant="outlined" size="small" onClick={() => { /* TODO: завершить опрос */ }}>
-                                        Завершить опрос
-                                    </Button>
+                                    <span>
+                                        <Button variant="outlined" size="small" onClick={handleFinishPoll}>
+                                            Завершить опрос
+                                        </Button>
+                                    </span>
                                 )}
                             </>
                         )}
                         {isAuthor && (
                             <IconButton onClick={handleMenuOpen}>
-                                <MoreVertIcon />
+                                <MoreVertIcon/>
                             </IconButton>
                         )}
                     </Stack>
@@ -227,9 +246,11 @@ export const QuestionPreview = () => {
                     {isAuthor && (
                         <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
                             {isDraft && (
-                                <MenuItem onClick={() => { /* TODO: редактировать */ }}>Редактировать</MenuItem>
+                                <MenuItem onClick={() => { /* TODO: редактировать */
+                                }}>Редактировать</MenuItem>
                             )}
-                            <MenuItem onClick={() => { /* TODO: удалить */ }}>Удалить</MenuItem>
+                            <MenuItem onClick={() => { /* TODO: удалить */
+                            }}>Удалить</MenuItem>
                         </Menu>
                     )}
                 </Box>
@@ -238,16 +259,16 @@ export const QuestionPreview = () => {
                     <Typography color="text.secondary">{question.description}</Typography>
                 )}
 
-                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mt: 3 }}>
+                <Box sx={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mt: 3}}>
                     {question.alternatives.map((alt, altIndex) => (
-                        <Paper key={alt.id} sx={{ p: 2, opacity: isDraft ? 0.6 : 1 }} elevation={isDraft ? 1 : 3}>
+                        <Paper key={alt.id} sx={{p: 2, opacity: isDraft ? 0.6 : 1}} elevation={isDraft ? 1 : 3}>
                             <Typography variant="subtitle1" gutterBottom>
                                 Вариант {altIndex + 1}: {alt.value}
                             </Typography>
 
                             {question.criteria.map((criterion) => (
-                                <Box key={criterion.id} sx={{ mb: 2 }}>
-                                    <Typography variant="body2" fontWeight="bold" sx={{ mb: 1 }}>
+                                <Box key={criterion.id} sx={{mb: 2}}>
+                                    <Typography variant="body2" fontWeight="bold" sx={{mb: 1}}>
                                         {criterion.name}
                                     </Typography>
                                     <Select
@@ -274,18 +295,18 @@ export const QuestionPreview = () => {
                 </Box>
             </Box>
 
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{flex: 1}}>
                 <Typography variant="h6" gutterBottom>Участники</Typography>
 
-                <Box sx={{ mb: 3 }}>
+                <Box sx={{mb: 3}}>
                     <Typography variant="subtitle2" gutterBottom>Отправили ответы</Typography>
-                    <Divider sx={{ mb: 2 }} />
+                    <Divider sx={{mb: 2}}/>
                     <Stack spacing={1}>
                         {respondedExperts.length ? respondedExperts.map((e) => {
                             const isCreator = e.email === question.createdBy.email;
                             return (
-                                <Paper key={e.email} elevation={2} sx={{ p: 1.5, borderRadius: 2 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <Paper key={e.email} elevation={2} sx={{p: 1.5, borderRadius: 2}}>
+                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
                                         <Typography
                                             variant="subtitle1"
                                             sx={{
@@ -297,7 +318,7 @@ export const QuestionPreview = () => {
                                         </Typography>
                                         {isCreator && (
                                             <Tooltip title="Автор вопроса">
-                                                <StarIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+                                                <StarIcon sx={{fontSize: 18, color: 'primary.main'}}/>
                                             </Tooltip>
                                         )}
                                     </Box>
@@ -314,13 +335,13 @@ export const QuestionPreview = () => {
 
                 <Box>
                     <Typography variant="subtitle2" gutterBottom>Ожидание ответа</Typography>
-                    <Divider sx={{ mb: 2 }} />
+                    <Divider sx={{mb: 2}}/>
                     <Stack spacing={1}>
                         {pendingExperts.length ? pendingExperts.map((e) => {
                             const isCreator = e.email === question.createdBy.email;
                             return (
-                                <Paper key={e.email} elevation={1} sx={{ p: 1.5, borderRadius: 2 }}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <Paper key={e.email} elevation={1} sx={{p: 1.5, borderRadius: 2}}>
+                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 0.5}}>
                                         <Typography
                                             variant="subtitle1"
                                             sx={{
@@ -332,7 +353,7 @@ export const QuestionPreview = () => {
                                         </Typography>
                                         {isCreator && (
                                             <Tooltip title="Автор вопроса">
-                                                <StarIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+                                                <StarIcon sx={{fontSize: 18, color: 'primary.main'}}/>
                                             </Tooltip>
                                         )}
                                     </Box>
@@ -353,10 +374,10 @@ export const QuestionPreview = () => {
                 <Snackbar
                     open={showSuccess}
                     autoHideDuration={3000}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                    anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
                     onClose={() => setShowSuccess(false)}
                 >
-                    <Alert severity="success" sx={{ width: '100%' }}>
+                    <Alert severity="success" sx={{width: '100%'}}>
                         {successMessage}
                     </Alert>
                 </Snackbar>
@@ -366,10 +387,10 @@ export const QuestionPreview = () => {
                 <Snackbar
                     open={showError}
                     autoHideDuration={3000}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                    anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
                     onClose={() => setShowError(false)}
                 >
-                    <Alert severity="error" sx={{ width: '100%' }}>
+                    <Alert severity="error" sx={{width: '100%'}}>
                         {errorMessage}
                     </Alert>
                 </Snackbar>

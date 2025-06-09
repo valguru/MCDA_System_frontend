@@ -1,3 +1,5 @@
+import {Alternative} from "./Question";
+
 export interface RatingOption {
     label: string;
     value: string;
@@ -42,3 +44,12 @@ export interface RatingCreateRequest {
     answers: RatingAnswer[];
 }
 
+export interface RankedAlternative {
+    rank: number;
+    alternative: Alternative;
+    weight: number;
+}
+
+export interface TopsisResult {
+    rankedAlternatives: RankedAlternative[];
+}

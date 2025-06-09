@@ -61,6 +61,7 @@ export const CreateQuestion = () => {
 
     const [showError, setShowError] = useState(false);
     const [showAccessDenied, setShowAccessDenied] = useState(false);
+    const [successSnackbarOpen, setSuccessSnackbarOpen] = useState(false);
 
 
     useEffect(() => {
@@ -109,7 +110,7 @@ export const CreateQuestion = () => {
         }
 
         try {
-            await questionApi.createQuestion({
+            const res = await questionApi.createQuestion({
                 teamId: +teamId!,
                 title: trimmedTitle,
                 description: description.trim() || undefined,
@@ -120,7 +121,14 @@ export const CreateQuestion = () => {
                     optimization: c.optimization as OptimizationDirection,
                 })),
             });
-            navigate(`/dashboard/teams/${teamId}`);
+
+            const id = res.data.id;
+            setSuccessSnackbarOpen(true);
+
+            setTimeout(() => {
+                navigate(`/dashboard/teams/${teamId}/question/${id}`);
+            }, 3000);
+
         } catch (err) {
             console.error('Ошибка при создании вопроса', err);
         }
@@ -323,7 +331,16 @@ export const CreateQuestion = () => {
                 </Alert>
             </Snackbar>
 
-
+            <Snackbar
+                open={successSnackbarOpen}
+                autoHideDuration={3000}
+                onClose={() => setSuccessSnackbarOpen(false)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert severity="success" sx={{ width: '100%' }}>
+                    Вопрос успешно создан! Перенаправление...
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };

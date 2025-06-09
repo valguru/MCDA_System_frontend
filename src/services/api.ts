@@ -78,6 +78,8 @@ export const questionApi = {
         api.get(`/questions/${questionId}`),
     activateQuestion: (questionId: number) =>
         api.patch(`/questions/${questionId}/activate`),
+    markAwaitingDecisionQuestion: (questionId: number) =>
+        api.patch(`/questions/${questionId}/await_decision`),
     getParticipants: (questionId: number) =>
         api.get(`/questions/${questionId}/participants`)
 };
@@ -91,6 +93,11 @@ export const ratingApi = {
             params: { questionId },
         });
     },
+    getTopsisRanking: (questionId: number) => {
+        return api.get('/ratings/topsis', {
+            params: { questionId },
+        });
+    }
 };
 
 export default api;
